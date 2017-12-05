@@ -2,10 +2,14 @@ const GOOGLE_API_KEY = 'AIzaSyAQCG4wcNxQHbYQ9WYstLWVb03HC_lDKeI';
 const FS_CLIENT_ID = 'X51LXWV4BDKANESBY1PCWEG2XDDG4FW0PTWFWOGXX0YTO5EL';
 const FS_CLIENT_SECRET = 'Q4EWJUPCQM114AESG5VKYLVLGRVZLDFW1OA3KPERTMIP2R02';
 
-let data = {};
+let data = {
+  coordinates: ko.observable(),
+  results: ko.observableArray()
+};
 
+// Gets coordinates using the Google Geocode API, then calls getVenues
 function getData(location, query) {
-  data.coordinates = null;
+  data.coordinates(null);
 
   $.ajax({
     url: 'https://maps.googleapis.com/maps/api/geocode/json',
@@ -15,13 +19,11 @@ function getData(location, query) {
       address: location
     },
     success: function(resp) {
-      let lat = resp.results[0].geometry.location.lat;
-      let lng = resp.results[0].geometry.location.lng;
-      //data.push({coordinates: lat.toString() + ',' + lng.toString()});
-
-      if (lat) {
-        data.coordinates = lat.toString() + ',' + lng.toString();
-      }
+      try {
+        let lat = resp.results[0].geometry.location.lat;
+        let lng = resp.results[0].geometry.location.lng;
+        data.coordinates(lat.toString() + ',' + lng.toString());
+      } catch(e) {}
 
       getVenues(query);
     }
@@ -29,11 +31,13 @@ function getData(location, query) {
 
 }
 
+// Gets venue data using the Foursquare API
 function getVenues(query) {
 
-  data.results = [];
+  //data.results = [];
+  data.results.removeAll();
 
-  if (!data.coordinates) {
+  if (!data.coordinates()) {
     return;
   }
 
@@ -44,7 +48,7 @@ function getVenues(query) {
       client_id: FS_CLIENT_ID,
       client_secret: FS_CLIENT_SECRET,
       v: '20170801',
-      ll: data.coordinates,
+      ll: data.coordinates(),
       query: query
     },
     success: function(resp) {
@@ -61,30 +65,37 @@ function getVenues(query) {
         venue = resp.response.groups[0].items[i].venue;
         info.api_id = venue.id;
         info.name = venue.name;
-        if (venue.categories[0].pluralName) {
+        try {
           info.category = venue.categories[0].pluralName;
-        } else {
+        } catch(e) {
           info.category = 'Unknown';
         }
-        if (venue.contact.formattedPhone) {
+        try {
           info.phone = venue.contact.formattedPhone;
-        }
-        if (venue.location.formattedAddress) {
-          var address = venue.location.formattedAddress;
+        } catch(e) {}
+        try {
+          let address = venue.location.formattedAddress;
           info.address = address.join('<br>');
-        }
-        var desc = resp.response.groups[0].items[i].tips[0].text;
-        if (desc) {
-          info.description = desc;
-        }
+        } catch(e) {}
+        try {
+          info.coordinates = {
+            lat: venue.location.lat,
+            lng: venue.location.lng
+          };
+        } catch(e) {}
+        try {
+          info.description = resp.response.groups[0].items[i].tips[0].text;
+        } catch(e) {}
 
         data.results.push(info);
       }
 
+      //ko.mapping.fromJS(data, vm);
+      //vm = ko.mapping.fromJS(data);
     }
   });
 
 }
 
-
-getCoordinates('frankfurt, germany', 'sushi');
+ko.applyBindings(data);
+getData('new york city', 'sushi');
