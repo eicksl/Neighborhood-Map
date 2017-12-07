@@ -1,3 +1,9 @@
+$(document).ready(function() {
+  $('#nav-icon-wrapper').click(function() {
+    $('.sidebar').toggleClass('collapsed');
+  });
+});
+
 const GOOGLE_API_KEY = 'AIzaSyAQCG4wcNxQHbYQ9WYstLWVb03HC_lDKeI';
 const FS_CLIENT_ID = 'X51LXWV4BDKANESBY1PCWEG2XDDG4FW0PTWFWOGXX0YTO5EL';
 const FS_CLIENT_SECRET = 'Q4EWJUPCQM114AESG5VKYLVLGRVZLDFW1OA3KPERTMIP2R02';
@@ -6,6 +12,12 @@ let data = {
   coordinates: ko.observable(),
   results: ko.observableArray()
 };
+
+function submitForm() {
+  let location = $('#location').val();
+  let query = $('#query').val();
+  getData(location, query);
+}
 
 // Gets coordinates using the Google Geocode API, then calls getVenues
 function getData(location, query) {
@@ -26,6 +38,22 @@ function getData(location, query) {
       } catch(e) {}
 
       getVenues(query);
+    },
+    error: function() {
+
+      navigator.geolocation.getCurrentPosition(
+        function success(pos) {
+          let coordinates = pos.coords.latitude.toString() + ',' +
+                            pos.coords.longitude.toString();
+          data.coordinates(coordinates);
+          getVenues(query);
+        },
+        function error() {
+          data.coordinates('40.7127753,-74.0059728');
+          getVenues(query);
+        }
+      );
+
     }
   });
 
@@ -34,10 +62,14 @@ function getData(location, query) {
 // Gets venue data using the Foursquare API
 function getVenues(query) {
 
+  console.log(data.coordinates());
+  console.log(query);
+
   //data.results = [];
   data.results.removeAll();
 
   if (!data.coordinates()) {
+    alert('An error occurred while processing the request');
     return;
   }
 
@@ -97,5 +129,17 @@ function getVenues(query) {
 
 }
 
-ko.applyBindings(data);
-getData('new york city', 'sushi');
+let map;
+function initMap() {
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: {lat: 40.7413549, lng: -73.9980244},
+    zoom: 13
+  });
+}
+
+//ko.applyBindings(data);
+//getData('new york city', 'sushi');
+
+//navigator.geolocation.getCurrentPosition(function(position) {
+//  console.log(position);
+//});

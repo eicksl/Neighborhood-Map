@@ -1,0 +1,97 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  height: 8%;
+  background: #363e36;
+}
+
+h1 {
+  display: inline-block;
+  font-family: 'Roboto', sans-serif;
+  margin-left: 25px;
+
+}
+
+#nav-icon-wrapper {
+  margin-left: 415px;
+  margin-top: 14px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.nav-icon {
+  width: 35px;
+  height: 5px;
+  background-color: #4f4fd0;
+  margin: 6px 0;
+  border-radius: 15px;
+}
+
+.sidebar {
+  position: absolute;
+  width: 340px;
+  height: 100%;
+  background: black;
+  box-shadow: 1px 0 5px 0.5px;
+  z-index: 1;
+  transition: transform 1s ease;
+}
+
+.sidebar-wrapper {
+  margin: 15px;
+}
+
+#map {
+  height: 92%;
+}
+
+.header-map-wrapper {
+  position: absolute;
+  height: 100%;
+  bottom: 0px;
+  right: 0px;
+  left: 0px;
+}
+
+.collapsed {
+  transform: translateX(-340px);
+  box-shadow: none;
+}
+
+.input-fields {
+  color: #3fdaf1;
+}
+
+hr {
+  background: #edf9fb;
+  height: 1px;
+  margin: 20px 8px 20px 8px;
+  border: none;
+}
+
+#filter {
+  margin-bottom: 20px;
+}
+
+.list-group {
+  cursor: pointer;
+}
+
+.list-group-item {
+  font-family: 'Roboto', sans-serif;
+  font-size: 20px;
+  background: black;
+  color: yellow;
+}
+
+.list-group-item:hover {
+  background: gray;
+}
