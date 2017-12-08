@@ -16,6 +16,7 @@ var data = {
   results: ko.observableArray()
 };
 
+// Pass form values to getData
 function submitForm() {
   let location = $('#location').val();
   let query = $('#query').val();
@@ -145,9 +146,13 @@ function getVenues(query) {
 
 }
 
+// Adds new markers for search results
 function addMarkers() {
   let bounds = new google.maps.LatLngBounds();
+  let infoWindow = new google.maps.InfoWindow();
+
   markers.length = 0;   // Delete old markers
+
   for (let i = 0; i < data.results().length; i++) {
     let marker = new google.maps.Marker({
       map: map,
@@ -155,12 +160,45 @@ function addMarkers() {
       title: data.results()[i].name,
       animation: google.maps.Animation.DROP
     });
+    marker.addListener('click', function() {
+      makeInfoWindow(this, infoWindow, i);
+    });
     markers.push(marker);
     bounds.extend(marker.position);
   }
+
   map.fitBounds(bounds);
 }
 
+function makeInfoWindow(marker, infoWindow, venueIndex) {
+  var content;
+  let venue = data.results()[venueIndex];
+
+  if (infoWindow.marker === marker) {
+    infoWindow.marker = null;
+    infoWindow.close();
+    return;
+  }
+
+  infoWindow.marker = marker;
+
+  content = '<p><strong>' + venue.name + '</strong></p><p>' + venue.address + '</p>';
+  if (typeof(venue.phone) !== 'undefined') {
+    content += '<p>' + venue.phone + '</p>';
+  }
+  if (typeof(venue.description) !== 'undefined') {
+    content += '<p><em>' + venue.description + '</em></p>';
+  }
+
+  infoWindow.setContent(content);
+  infoWindow.open(map, marker);
+  infoWindow.addListener('click', function(){
+    infoWindow.setMarker = null;
+    infoWindow.close();
+  });
+}
+
+// Initialize the map
 function initMap() {
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 40.7413549, lng: -73.9980244},
