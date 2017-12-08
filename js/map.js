@@ -8,12 +8,13 @@ const GOOGLE_API_KEY = 'AIzaSyAQCG4wcNxQHbYQ9WYstLWVb03HC_lDKeI';
 const FS_CLIENT_ID = 'X51LXWV4BDKANESBY1PCWEG2XDDG4FW0PTWFWOGXX0YTO5EL';
 const FS_CLIENT_SECRET = 'Q4EWJUPCQM114AESG5VKYLVLGRVZLDFW1OA3KPERTMIP2R02';
 
+var map;
+var markers = [];
+var activeListElem = null;
 var data = {
   coordinates: ko.observable(),
   results: ko.observableArray()
 };
-
-var activeListElem = null;
 
 function submitForm() {
   let location = $('#location').val();
@@ -83,14 +84,11 @@ function getData(location, query) {
 // Gets venue data using the Foursquare API
 function getVenues(query) {
 
-  console.log(data.coordinates());
-  console.log(query);
-
   //data.results = [];
   data.results.removeAll();
 
   if (!data.coordinates()) {
-    alert('An error occurred while processing the request');
+    alert('That location could not be found. Please try modifying it.');
     return;
   }
 
@@ -105,15 +103,13 @@ function getVenues(query) {
       query: query
     },
     success: function(resp) {
-      if (resp.meta.code !== 200) {
-        return;
-      }
       numOfVenues = resp.response.groups[0].items.length;
       if (numOfVenues === 0) {
+        alert('No results found. Please try modifying your search.')
         return;
       }
 
-      for (i = 0; i < numOfVenues; i++) {
+      for (let i = 0; i < numOfVenues; i++) {
         info = {};
         venue = resp.response.groups[0].items[i].venue;
         info.api_id = venue.id;
@@ -143,23 +139,38 @@ function getVenues(query) {
         data.results.push(info);
       }
 
-      //ko.mapping.fromJS(data, vm);
-      //vm = ko.mapping.fromJS(data);
+      addMarkers();
     }
   });
 
 }
 
-let map;
+function addMarkers() {
+  let bounds = new google.maps.LatLngBounds();
+  markers.length = 0;   // Delete old markers
+  for (let i = 0; i < data.results().length; i++) {
+    let marker = new google.maps.Marker({
+      map: map,
+      position: data.results()[i].coordinates,
+      title: data.results()[i].name,
+      animation: google.maps.Animation.DROP
+    });
+    markers.push(marker);
+    bounds.extend(marker.position);
+  }
+  map.fitBounds(bounds);
+}
+
 function initMap() {
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 40.7413549, lng: -73.9980244},
-    zoom: 13
+    zoom: 13,
+    mapTypeControl: false
   });
 }
 
+
 ko.applyBindings(data);
-//getData('new york city', 'sushi');
 
 //navigator.geolocation.getCurrentPosition(function(position) {
 //  console.log(position);
