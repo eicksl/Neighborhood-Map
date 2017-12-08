@@ -46,10 +46,9 @@
         <input id='filter' class='form-control form-control-sm' type='text'
                name='filter' placeholder='Filter Results'>
 
-        <ul class='list-group'>
-          <li class='list-group-item'>Test1</li>
-          <li class='list-group-item'>Test2</li>
-          <li class='list-group-item'>Test3</li>
+        <ul class='list-group' data-bind='foreach: data.results'>
+          <li class='list-group-item' onclick='toggleActive(this)'
+              data-bind='text: name'></li>
         </ul>
 
       </div>

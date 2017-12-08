@@ -8,15 +8,36 @@ const GOOGLE_API_KEY = 'AIzaSyAQCG4wcNxQHbYQ9WYstLWVb03HC_lDKeI';
 const FS_CLIENT_ID = 'X51LXWV4BDKANESBY1PCWEG2XDDG4FW0PTWFWOGXX0YTO5EL';
 const FS_CLIENT_SECRET = 'Q4EWJUPCQM114AESG5VKYLVLGRVZLDFW1OA3KPERTMIP2R02';
 
-let data = {
+var data = {
   coordinates: ko.observable(),
   results: ko.observableArray()
 };
+
+var activeListElem = null;
 
 function submitForm() {
   let location = $('#location').val();
   let query = $('#query').val();
   getData(location, query);
+}
+
+// Keeps track of the active selection in the results list
+function toggleActive(elem) {
+  if (!activeListElem) {
+    activeListElem = elem;
+    elem.classList.add('active');
+  }
+  else {
+    if (elem === activeListElem) {
+      activeListElem = null;
+      elem.classList.remove('active');
+    }
+    else {
+      activeListElem.classList.remove('active');
+      activeListElem = elem;
+      elem.classList.add('active');
+    }
+  }
 }
 
 // Gets coordinates using the Google Geocode API, then calls getVenues
@@ -137,7 +158,7 @@ function initMap() {
   });
 }
 
-//ko.applyBindings(data);
+ko.applyBindings(data);
 //getData('new york city', 'sushi');
 
 //navigator.geolocation.getCurrentPosition(function(position) {
