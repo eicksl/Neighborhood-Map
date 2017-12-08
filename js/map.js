@@ -13,7 +13,8 @@ var markers = [];
 var activeListElem = null;
 var data = {
   coordinates: ko.observable(),
-  results: ko.observableArray()
+  results: ko.observableArray(),
+  activeVenue: ko.observable(null)
 };
 
 // Pass form values to getData
@@ -21,6 +22,15 @@ function submitForm() {
   let location = $('#location').val();
   let query = $('#query').val();
   getData(location, query);
+}
+
+function test(index) {
+  if (data.activeVenue() === index) {
+    data.activeVenue(null);
+  }
+  else {
+    data.activeVenue(index);
+  }
 }
 
 // Keeps track of the active selection in the results list
@@ -192,10 +202,6 @@ function makeInfoWindow(marker, infoWindow, venueIndex) {
 
   infoWindow.setContent(content);
   infoWindow.open(map, marker);
-  infoWindow.addListener('click', function(){
-    infoWindow.setMarker = null;
-    infoWindow.close();
-  });
 }
 
 // Initialize the map

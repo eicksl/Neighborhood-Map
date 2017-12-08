@@ -47,8 +47,13 @@
                name='filter' placeholder='Filter Results'>
 
         <ul class='list-group' data-bind='foreach: data.results'>
+          <!--
           <li class='list-group-item' onclick='toggleActive(this)'
               data-bind='text: name'></li>
+          -->
+          <li class='list-group-item'
+          data-bind='text: name, css: {active: $index === $root.activeVenue()},
+          click: test($index)'></li>
         </ul>
 
       </div>
