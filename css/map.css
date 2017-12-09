@@ -17,12 +17,12 @@ h1 {
   display: inline-block;
   font-family: 'Roboto', sans-serif;
   margin-left: 25px;
-
+  transform: translateY(-5px);
 }
 
 #nav-icon-wrapper {
   margin-left: 415px;
-  margin-top: 14px;
+  margin-top: 22px;
   cursor: pointer;
   display: inline-block;
 }

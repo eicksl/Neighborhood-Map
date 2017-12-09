@@ -44,12 +44,13 @@
         <hr>
 
         <input id='filter' class='form-control form-control-sm' type='text'
-               placeholder='Filter Results' data-bind='textInput: filterStr'>
+               placeholder='Filter Results' name='filter'
+               data-bind='visible: results().length > 0, textInput: filterStr'>
 
         <ul class='list-group' data-bind='foreach: filteredResults'>
           <li class='list-group-item'
-          data-bind='text: name, css: {active: $index() === $root.activeVenue()},
-                     click: toggleActive.bind($index())'></li>
+          data-bind="text: name, css: {active: index === $root.activeVenue()},
+                     click: function(){toggleActive(index)}"></li>
         </ul>
 
       </div>

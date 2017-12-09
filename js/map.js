@@ -21,19 +21,20 @@ function ViewModel() {
   self.filterStr = ko.observable('');
   self.filteredResults = ko.computed(function() {
     let filter = self.filterStr().toLowerCase();
-//    if (!filter) {
-//      return self.results();
-//    } else {
-      return ko.utils.arrayFilter(self.results(), function(result, index) {
-        let hasSubstr = result.name.toLowerCase().indexOf(filter) > -1;
-        if (typeof(markers[index]) !== 'undefined') {
-          markers[index].setVisible(hasSubstr);
+    return ko.utils.arrayFilter(self.results(), function(result, index) {
+      let hasSubstr = result.name.toLowerCase().indexOf(filter) > -1;
+      if (typeof(markers[index]) !== 'undefined') {
+        markers[index].setVisible(hasSubstr);
+        if (typeof(infoWindow) !== 'undefined'
+        && infoWindow.marker === markers[index] && !hasSubstr) {
+          infoWindow.close();
+          self.activeVenue(null);
         }
-        return hasSubstr;
-      });
-//    }
+      }
+      return hasSubstr;
+    });
   })
-};
+}
 
 // Pass form values to getData
 function submitForm() {
@@ -125,6 +126,7 @@ function getVenues(query) {
       for (let i = 0; i < numOfVenues; i++) {
         info = {};
         venue = resp.response.groups[0].items[i].venue;
+        info.index = i;
         info.api_id = venue.id;
         info.name = venue.name;
         try {
@@ -160,8 +162,8 @@ function getVenues(query) {
 
 // Adds new markers for search results
 function addMarkers() {
+  infoWindow = new google.maps.InfoWindow();
   let bounds = new google.maps.LatLngBounds();
-  let infoWindow = new google.maps.InfoWindow();
 
   markers.length = 0;   // Delete old markers
 
@@ -173,8 +175,18 @@ function addMarkers() {
       animation: google.maps.Animation.DROP
     });
     marker.addListener('click', function() {
-      makeInfoWindow(this, infoWindow, i);
+      let self = this;
+      makeInfoWindow(self, i);
+      // makeInfoWindow sets infoWindow.marker equal to null when the active
+      // marker is again clicked, so the following if statement will not execute
+      if (infoWindow.marker) {
+        self.setAnimation(google.maps.Animation.BOUNCE);
+        setTimeout(function() {
+          self.setAnimation(null);
+        }, 700);
+      }
     });
+
     markers.push(marker);
     bounds.extend(marker.position);
   }
@@ -182,7 +194,7 @@ function addMarkers() {
   map.fitBounds(bounds);
 }
 
-function makeInfoWindow(marker, infoWindow, venueIndex) {
+function makeInfoWindow(marker, venueIndex) {
   var content;
   let venue = data.results()[venueIndex];
 
