@@ -24,32 +24,16 @@ function submitForm() {
   getData(location, query);
 }
 
-function test(index) {
+// Keeps track of the active selection in the results list
+function toggleActive(index) {
   if (data.activeVenue() === index) {
     data.activeVenue(null);
   }
   else {
     data.activeVenue(index);
   }
-}
 
-// Keeps track of the active selection in the results list
-function toggleActive(elem) {
-  if (!activeListElem) {
-    activeListElem = elem;
-    elem.classList.add('active');
-  }
-  else {
-    if (elem === activeListElem) {
-      activeListElem = null;
-      elem.classList.remove('active');
-    }
-    else {
-      activeListElem.classList.remove('active');
-      activeListElem = elem;
-      elem.classList.add('active');
-    }
-  }
+  google.maps.event.trigger(markers[index], 'click');
 }
 
 // Gets coordinates using the Google Geocode API, then calls getVenues
@@ -185,11 +169,13 @@ function makeInfoWindow(marker, infoWindow, venueIndex) {
   let venue = data.results()[venueIndex];
 
   if (infoWindow.marker === marker) {
+    data.activeVenue(null);
     infoWindow.marker = null;
     infoWindow.close();
     return;
   }
 
+  data.activeVenue(venueIndex);
   infoWindow.marker = marker;
 
   content = '<p><strong>' + venue.name + '</strong></p><p>' + venue.address + '</p>';
@@ -201,6 +187,9 @@ function makeInfoWindow(marker, infoWindow, venueIndex) {
   }
 
   infoWindow.setContent(content);
+  infoWindow.addListener('closeclick', function(){
+    data.activeVenue(null);
+  });
   infoWindow.open(map, marker);
 }
 
