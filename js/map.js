@@ -10,11 +10,29 @@ const FS_CLIENT_SECRET = 'Q4EWJUPCQM114AESG5VKYLVLGRVZLDFW1OA3KPERTMIP2R02';
 
 var map;
 var markers = [];
-var activeListElem = null;
-var data = {
-  coordinates: ko.observable(),
-  results: ko.observableArray(),
-  activeVenue: ko.observable(null)
+var data = new ViewModel();
+
+function ViewModel() {
+  let self = this;
+
+  self.coordinates = ko.observable();
+  self.results = ko.observableArray();
+  self.activeVenue = ko.observable(null);
+  self.filterStr = ko.observable('');
+  self.filteredResults = ko.computed(function() {
+    let filter = self.filterStr().toLowerCase();
+//    if (!filter) {
+//      return self.results();
+//    } else {
+      return ko.utils.arrayFilter(self.results(), function(result, index) {
+        let hasSubstr = result.name.toLowerCase().indexOf(filter) > -1;
+        if (typeof(markers[index]) !== 'undefined') {
+          markers[index].setVisible(hasSubstr);
+        }
+        return hasSubstr;
+      });
+//    }
+  })
 };
 
 // Pass form values to getData
