@@ -152,12 +152,34 @@ function getVenues(query) {
         } catch(e) {}
 
         data.results.push(info);
+        getImage(info.api_id, i);
       }
 
       addMarkers();
     }
   });
+}
 
+function getImage(venue_id, index) {
+  let url = 'https://api.foursquare.com/v2/venues/' + venue_id + '/photos';
+  let params = {
+    client_id: FS_CLIENT_ID,
+    client_secret: FS_CLIENT_SECRET,
+    v: '20170801'
+  };
+  $.ajax({
+    url: url,
+    data: params,
+    dataType: 'json',
+    success: function(resp) {
+      try {
+        let prefix = resp.response.photos.items[0].prefix;
+        let suffix = resp.response.photos.items[0].suffix;
+        let image_url = prefix + '300x200' + suffix;
+        data.results()[index].image = image_url;
+      } catch(e) {}
+    }
+  });
 }
 
 // Adds new markers for search results
@@ -214,6 +236,9 @@ function makeInfoWindow(marker, venueIndex) {
   }
   if (typeof(venue.description) !== 'undefined') {
     content += '<p><em>' + venue.description + '</em></p>';
+  }
+  if (typeof(venue.image) !== 'undefined') {
+    content += "<br><img src='" + venue.image + "'>";
   }
 
   infoWindow.setContent(content);
