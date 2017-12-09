@@ -1,9 +1,3 @@
-$(document).ready(function() {
-  $('#nav-icon-wrapper').click(function() {
-    $('.sidebar').toggleClass('collapsed');
-  });
-});
-
 const GOOGLE_API_KEY = 'AIzaSyAQCG4wcNxQHbYQ9WYstLWVb03HC_lDKeI';
 const FS_CLIENT_ID = 'X51LXWV4BDKANESBY1PCWEG2XDDG4FW0PTWFWOGXX0YTO5EL';
 const FS_CLIENT_SECRET = 'Q4EWJUPCQM114AESG5VKYLVLGRVZLDFW1OA3KPERTMIP2R02';
@@ -160,6 +154,7 @@ function getVenues(query) {
   });
 }
 
+// Fetches image from Foursquare and updates data
 function getImage(venue_id, index) {
   let url = 'https://api.foursquare.com/v2/venues/' + venue_id + '/photos';
   let params = {
@@ -216,6 +211,7 @@ function addMarkers() {
   map.fitBounds(bounds);
 }
 
+// Populate the infowindow with data and display it
 function makeInfoWindow(marker, venueIndex) {
   var content;
   let venue = data.results()[venueIndex];
@@ -248,18 +244,39 @@ function makeInfoWindow(marker, venueIndex) {
   infoWindow.open(map, marker);
 }
 
-// Initialize the map
+// Initialize the map and get user location
 function initMap() {
+  let geocoder = new google.maps.Geocoder;
+
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 40.7413549, lng: -73.9980244},
     zoom: 13,
     mapTypeControl: false
   });
+
+  navigator.geolocation.getCurrentPosition(
+    function success(pos) {
+      let coordinates = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude
+      };
+      geocoder.geocode({location: coordinates}, function(results, status) {
+        var address = '';
+        if (status === 'OK' && results[0]) {
+          address = results[0].formatted_address;
+        }
+        $('#location').val(address);
+      });
+      map.setCenter(coordinates);
+    }
+  );
 }
 
 
-ko.applyBindings(data);
+$(document).ready(function() {
+  $('#nav-icon-wrapper').click(function() {
+    $('.sidebar').toggleClass('collapsed');
+  });
+});
 
-//navigator.geolocation.getCurrentPosition(function(position) {
-//  console.log(position);
-//});
+ko.applyBindings(data);
