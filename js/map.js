@@ -85,14 +85,14 @@ function getData(location, query) {
       );
 
     }
+  }).fail(function() {
+    alert('Failed to retrieve location coordinates from Google Geocode');
   });
 
 }
 
 // Gets venue data using the Foursquare API
 function getVenues(query) {
-
-  //data.results = [];
   data.results.removeAll();
 
   if (!data.coordinates()) {
@@ -151,6 +151,8 @@ function getVenues(query) {
 
       addMarkers();
     }
+  }).fail(function() {
+    alert('Failed to retrieve venue data from Foursquare');
   });
 }
 
