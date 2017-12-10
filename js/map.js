@@ -177,6 +177,8 @@ function getImage(venue_id, index) {
         data.results()[index].image = image_url;
       } catch(e) {}
     }
+  }).fail(function() {
+    alert('Image request from Foursquare API failed');
   });
 }
 
@@ -248,6 +250,12 @@ function makeInfoWindow(marker, venueIndex) {
     data.activeVenue(null);
   });
   infoWindow.open(map, marker);
+
+  google.maps.event.addListener(map, "click", function() {
+    infoWindow.marker = null;
+    data.activeVenue(null);
+    infoWindow.close();
+  });
 }
 
 // Initialize the map and get user location
@@ -274,7 +282,7 @@ function initMap() {
           address = results[0].formatted_address;
           getData(address, '');
         }
-        $('#location').val(address);
+        data.location(address);
       });
       //map.setCenter(coordinates);
     }
