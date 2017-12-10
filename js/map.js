@@ -9,10 +9,13 @@ var data = new ViewModel();
 function ViewModel() {
   let self = this;
 
+  self.location = ko.observable('');
+  self.query = ko.observable('');
   self.coordinates = ko.observable();
   self.results = ko.observableArray();
   self.activeVenue = ko.observable(null);
   self.filterStr = ko.observable('');
+  self.sidebarHidden = ko.observable(false);
   self.filteredResults = ko.computed(function() {
     let filter = self.filterStr().toLowerCase();
     return ko.utils.arrayFilter(self.results(), function(result, index) {
@@ -30,11 +33,9 @@ function ViewModel() {
   })
 }
 
-// Pass form values to getData
-function submitForm() {
-  let location = $('#location').val();
-  let query = $('#query').val();
-  getData(location, query);
+// Keeps track of whether sidebar is displayed
+function toggleSidebar() {
+  data.sidebarHidden(!data.sidebarHidden());
 }
 
 // Keeps track of the active selection in the results list
@@ -211,6 +212,9 @@ function addMarkers() {
   }
 
   map.fitBounds(bounds);
+  google.maps.event.addDomListener(window, 'resize', function() {
+    map.fitBounds(bounds);
+  });
 }
 
 // Populate the infowindow with data and display it
@@ -277,11 +281,5 @@ function initMap() {
   );
 }
 
-
-$(document).ready(function() {
-  $('#nav-icon-wrapper').click(function() {
-    $('.sidebar').toggleClass('collapsed');
-  });
-});
 
 ko.applyBindings(data);
