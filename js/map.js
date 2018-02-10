@@ -268,7 +268,7 @@ function initMap() {
     mapTypeControl: false
   });
 
-  getData('new york city', '');
+  //getData('new york city', '');
 
   navigator.geolocation.getCurrentPosition(
     function success(pos) {
@@ -277,14 +277,17 @@ function initMap() {
         lng: pos.coords.longitude
       };
       geocoder.geocode({location: coordinates}, function(results, status) {
-        var address = '';
+        let address = '';
         if (status === 'OK' && results[0]) {
           address = results[0].formatted_address;
+          data.location(address);
           getData(address, '');
         }
-        data.location(address);
       });
       //map.setCenter(coordinates);
+    },
+    function error() {
+      getData('new york city', '');
     }
   );
 }
