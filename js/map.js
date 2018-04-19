@@ -234,7 +234,8 @@ function makeInfoWindow(marker, venueIndex) {
   data.activeVenue(venueIndex);
   infoWindow.marker = marker;
 
-  content = '<p><strong>' + venue.name + '</strong></p><p>' + venue.address + '</p>';
+  content = "<div class='iw-content'>";
+  content += '<p><strong>' + venue.name + '</strong></p><p>' + venue.address + '</p>';
   if (typeof(venue.phone) !== 'undefined') {
     content += '<p>' + venue.phone + '</p>';
   }
@@ -244,6 +245,7 @@ function makeInfoWindow(marker, venueIndex) {
   if (typeof(venue.image) !== 'undefined') {
     content += "<br><img src='" + venue.image + "'>";
   }
+  content += '</div>'
 
   infoWindow.setContent(content);
   infoWindow.addListener('closeclick', function(){
