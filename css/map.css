@@ -10,9 +10,9 @@ html, body {
 
 header {
   height: 85px;
-  background: #dae8e6;
+  background: url('../img/sky.jpg');
   z-index: 2;
-  border-bottom: 2px solid gray;
+  border-bottom: 1px solid gray;
 }
 
 h1 {
