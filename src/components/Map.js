@@ -1,14 +1,31 @@
 import React, {Component} from 'react'
-import {withScriptjs, withGoogleMap, GoogleMap} from 'react-google-maps'
+import {withScriptjs, withGoogleMap, GoogleMap, Marker} from 'react-google-maps'
+import PropTypes from 'prop-types'
 
 
 class Map extends Component {
+  static propTypes = {
+    results: PropTypes.array.isRequired
+  }
+
   render() {
     const GoogleMapInstance = withScriptjs(withGoogleMap(props => (
       <GoogleMap
         defaultCenter = {{lat: 40.756795, lng: -73.954298}}
         defaultZoom = {13}
       >
+        {
+          this.props.results.map((venue, i) => {
+            return (
+              <Marker
+                key={i}
+                position={venue.coordinates}
+                title={venue.name}
+                animation={window.google.maps.Animation.DROP}
+              />
+            )
+          })
+        }
       </GoogleMap>
     )))
     const wrapperStyle = {

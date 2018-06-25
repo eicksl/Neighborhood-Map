@@ -4,7 +4,8 @@ import React, {Component} from 'react'
 //import { withScriptjs, withGoogleMap, GoogleMap, Marker } from "react-google-maps"
 import {GOOGLE_API_KEY, FS_CLIENT_ID, FS_CLIENT_SECRET} from '../constants.js'
 import '../css/App.css'
-import Map from './Map.js'
+//import Map from './Map.js'
+import Navigation from './Navigation.js'
 
 
 class App extends Component {
@@ -12,26 +13,52 @@ class App extends Component {
     super()
     this.state = {
       coordinates: '40.7127753,-74.0059728',
-      results: []
+      navClassName: 'sidebar',
+      map: null,
+      infoWindow: null,
+      activeVenue: null,
+      results: [],
+      markers: []
     }
     setTimeout(() => {
       console.log(this.state)
+      //window.google.maps.event.trigger(this.state.markers[0], 'click')
     }, 5000)
   }
+
 
   componentDidMount() {
     const wait = setInterval(() => {
       if (window.google) {
         clearInterval(wait)
-        this.getData('new york city', '')
+        //this.getData('new york city', '')
+        this.createMap()
       }
     }, 100)
   }
+
+
+  createMap() {
+    //const geocoder = new window.google.maps.Geocoder
+    const map = new window.google.maps.Map(document.getElementById('map'), {
+      center: {lat: 40.7413549, lng: -73.9980244},
+      zoom: 13,
+      mapTypeControl: false
+    })
+    this.setState({
+      map: map,
+      infoWindow: new window.google.maps.InfoWindow()
+    })
+    this.getData('new york city', '')
+  }
+
 
   getData(location, query) {
     const url = new URL("https://maps.googleapis.com/maps/api/geocode/json")
     const params = {key: GOOGLE_API_KEY, address: location}
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+
+    this.setState({markers: []})
 
     fetch(url).then(resp => resp.json())
     .catch(() => alert('Failed to retrieve location coordinates from Google Geocode'))
@@ -48,6 +75,7 @@ class App extends Component {
       }
     })
   }
+
 
   getVenues(query) {
     const url = new URL("https://api.foursquare.com/v2/venues/explore")
@@ -100,13 +128,14 @@ class App extends Component {
         } catch(e) {}
 
         results.push(info)
-        this.getImage(info.api_id, i)
+        //this.getImage(info.api_id, i)
       }
 
       this.setState({results: results})
-      //this.addMarkers()
+      this.addMarkers()
     })
   }
+
 
   getImage(venue_id, index) {
     const url = new URL("https://api.foursquare.com/v2/venues/" + venue_id + '/photos')
@@ -123,142 +152,154 @@ class App extends Component {
       try {
         const prefix = resp.response.photos.items[0].prefix
         const suffix = resp.response.photos.items[0].suffix
-        const resultsCopy = [...this.state.results]
-        const venueCopy = {...resultsCopy[index]}
-        venueCopy.image = prefix + '300x200' + suffix
-        resultsCopy[index] = venueCopy
-        this.setState({results: resultsCopy})
-      } catch(e) {}
+        const image = prefix + '300x200' + suffix
+        //const resultsCopy = [...this.state.results]
+        //const venueCopy = {...resultsCopy[index]}
+        //venueCopy.image = prefix + '300x200' + suffix
+        //resultsCopy[index] = venueCopy
+        //this.setState({results: resultsCopy})
+        this.setState(state => ({
+          results: [...state.results, [state.results[venue_id].image]: image]
+        }))
+      } catch(e) {console.log(e)}
     })
   }
 
+
+  addMarkers() {
+    const self = this
+    const {map, results, infoWindow} = this.state
+    const markers = []
+    let bounds = new window.google.maps.LatLngBounds();
+
+    for (let i = 0; i < results.length; i++) {
+      let marker = new window.google.maps.Marker({
+        map: map,
+        position: results[i].coordinates,
+        title: results[i].name,
+        animation: window.google.maps.Animation.DROP
+      })
+
+      marker.addListener('click', function() {
+        self.makeInfoWindow(this, i)
+        // makeInfoWindow sets infoWindow.marker equal to null when the active
+        // marker is again clicked, so the following if statement will not execute
+        if (infoWindow.marker) {
+          this.setAnimation(window.google.maps.Animation.BOUNCE)
+          setTimeout(() => {
+            this.setAnimation(null)
+          }, 700)
+        }
+      })
+
+      markers.push(marker);
+      bounds.extend(marker.position);
+    }
+
+    this.setState({markers: markers})
+    map.fitBounds(bounds);
+    window.google.maps.event.addDomListener(window, 'resize', () => {
+      map.fitBounds(bounds);
+    });
+  }
+
+
+  makeInfoWindow(marker, venueIndex) {
+    let content
+    const {map, infoWindow, results} = this.state
+    const venue = results[venueIndex]
+
+    if (infoWindow.marker === marker) {
+      this.setState({activeVenue: null})
+      infoWindow.marker = null
+      infoWindow.close()
+      return
+    }
+
+    this.setState({activeVenue: venueIndex})
+    infoWindow.marker = marker
+
+    content = "<div class='iw-content'>"
+    content += '<p><strong>' + venue.name + '</strong></p><p>' + venue.address + '</p>'
+    if (typeof(venue.phone) !== 'undefined') {
+      content += '<p>' + venue.phone + '</p>'
+    }
+    if (typeof(venue.description) !== 'undefined') {
+      content += '<p><em>' + venue.description + '</em></p>'
+    }
+    if (typeof(venue.image) !== 'undefined') {
+      content += "<br><img src='" + venue.image + "'>"
+    }
+    content += '</div>'
+
+    infoWindow.setContent(content)
+    infoWindow.addListener('closeclick', () => {
+      this.setState({activeVenue: null})
+    })
+    infoWindow.open(map, marker)
+
+    window.google.maps.event.addListener(map, "click", () => {
+      infoWindow.marker = null
+      this.setState({activeVenue: null})
+      infoWindow.close()
+    })
+  }
+
+
+  toggleNavClassName = () => {
+    if (this.state.navClassName === 'sidebar') {
+      this.setState({navClassName: 'sidebar collapsed'})
+    } else {
+      this.setState({navClassName: 'sidebar'})
+    }
+  }
+
+
+  toggleActive = index => {
+    console.log(index)
+    if (this.state.activeVenue === index) {
+      this.setState({activeVenue: null})
+    }
+    else {
+      this.setState({activeVenue: index})
+    }
+    window.google.maps.event.trigger(this.state.markers[index], 'click')
+  }
+
+
   render() {
+    const wrapperStyle = {
+      position: 'absolute',
+      height: '100%',
+      bottom: 0,
+      right: 0,
+      left: 0
+    }
+    const mapStyle = {
+      height: '92%',
+      zIndex: 3
+    }
     return (
       <div id="app-container">
-        <header>
-          <div id='nav-icon-wrapper'>
-            <div className='nav-icon'></div>
-            <div className='nav-icon'></div>
-            <div className='nav-icon'></div>
-          </div>
-          <img id='logo' src='../img/logo.png' alt='' />
-        </header>
-        <Map />
+        <Navigation
+          navClassName={this.state.navClassName} results={this.state.results}
+          activeVenue={this.state.activeVenue} toggleActive={this.toggleActive}
+        />
+        <div id="header-map-wrapper" style={wrapperStyle}>
+          <header>
+            <div id='nav-icon-wrapper' onClick={this.toggleNavClassName}>
+              <div className='nav-icon'></div>
+              <div className='nav-icon'></div>
+              <div className='nav-icon'></div>
+            </div>
+            <img id='logo' src={require('../img/logo.png')} alt='' />
+          </header>
+          <div id="map" role="application" style={mapStyle}></div>
+        </div>
       </div>
     )
   }
 }
-
-
-/*
-class App extends Component {
-  constructor() {
-    super()
-    this.state = {map: null}
-  }
-
-  componentDidMount() {
-    const wait = setInterval(() => {
-      if (window.google) {
-        clearInterval(wait)
-        this.createMap()
-      }
-    }, 100)
-  }
-
-  createMap() {
-    const geocoder = new google.maps.Geocoder
-    const map = new window.google.maps.Map(document.getElementById('map'), {
-      center: {lat: 40.7413549, lng: -73.9980244},
-      zoom: 13,
-      mapTypeControl: false
-    })
-    this.setState({map: map})
-    this.getData('new york city', '')
-
-
-    navigator.geolocation.getCurrentPosition(
-      function success(pos) {
-        const coordinates = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude
-        }
-        geocoder.geocode({location: coordinates}, function(results, status) {
-          let address = '';
-          if (status === 'OK' && results[0]) {
-            address = results[0].formatted_address;
-            data.location(address);
-            getData(address, '');
-          }
-        })
-        //map.setCenter(coordinates);
-      },
-      function error() {
-        getData('new york city', '');
-      }
-    )
-
-  }
-
-  getData(location, query) {
-    const url = new URL(
-      "https://maps.googleapis.com/maps/api/geocode/json"),
-      params = {key: GOOGLE_API_KEY, address: location}
-      Object.keys(params).forEach(key => url.searchParams.append(key, params[key])
-    )
-    fetch(url).then(resp => {
-      console.log(resp)
-    })
-
-      success: function(resp) {
-        try {
-          let lat = resp.results[0].geometry.location.lat;
-          let lng = resp.results[0].geometry.location.lng;
-          data.coordinates(lat.toString() + ',' + lng.toString());
-        } catch(e) {}
-
-        getVenues(query);
-      },
-      error: function() {
-
-        navigator.geolocation.getCurrentPosition(
-          function success(pos) {
-            let coordinates = pos.coords.latitude.toString() + ',' +
-                              pos.coords.longitude.toString();
-            data.coordinates(coordinates);
-            getVenues(query);
-          },
-          function error() {
-            data.coordinates('40.7127753,-74.0059728');
-            getVenues(query);
-          }
-        );
-
-      }
-    }).fail(function() {
-      alert('Failed to retrieve location coordinates from Google Geocode');
-    });
-
-  }
-
-  render() {
-    return (
-      <div className="header-map-wrapper">
-        <header>
-          <div id='nav-icon-wrapper'>
-            <div className='nav-icon'></div>
-            <div className='nav-icon'></div>
-            <div className='nav-icon'></div>
-          </div>
-          <img id='logo' src='../img/logo.png' alt='' />
-        </header>
-        <div id="map"></div>
-      </div>
-    )
-  }
-
-}
-*/
 
 
 export default App
