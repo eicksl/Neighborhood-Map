@@ -1,6 +1,7 @@
 import React, {PureComponent} from 'react'
 import PropTypes from 'prop-types'
 import escapeRegExp from 'escape-string-regexp'
+import sortBy from 'sort-by'
 import ResultsList from './ResultsList.js'
 
 
@@ -22,14 +23,23 @@ class Navigation extends PureComponent {
   }
 
 
+  componentDidUpdate(prevProps) {
+    if (this.props.results !== prevProps.results) {
+      //copy results to prevent the original indeces from being modified
+      const resultsCopy = [...this.props.results]
+      this.setState({filteredResults: resultsCopy.sort(sortBy('name'))})
+    }
+  }
+
+
   updateFiltered = event => {
     this.setState({filterValue: event.target.value}, () => {
       const {filterValue} = this.state
       if (filterValue) {
         const match = new RegExp(escapeRegExp(filterValue), 'i')
-        //const searchTerm = searchTerms.find(term => match.test(term))
+        const newResults = this.props.results.filter(venue => match.test(venue.name))
         this.setState({
-          filteredResults: this.props.results.filter(venue => match.test(venue.name))
+          filteredResults: newResults.sort(sortBy('name'))
         })
       } else {
         this.setState({filteredResults: this.props.results})
@@ -39,7 +49,7 @@ class Navigation extends PureComponent {
 
 
   render() {
-    const {results, activeVenue, toggleActive} = this.props
+    const {activeVenue, toggleActive} = this.props
     return (
       <nav className={this.props.navClassName}>
         <div className='sidebar-wrapper'>

@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 //import Script from 'react-load-script'
 //import {load} from 'little-loader'
 //import { withScriptjs, withGoogleMap, GoogleMap, Marker } from "react-google-maps"
+//import sortBy from 'sort-by'
 import {GOOGLE_API_KEY, FS_CLIENT_ID, FS_CLIENT_SECRET} from '../constants.js'
 import '../css/App.css'
 //import Map from './Map.js'
@@ -31,7 +32,6 @@ class App extends Component {
     const wait = setInterval(() => {
       if (window.google) {
         clearInterval(wait)
-        //this.getData('new york city', '')
         this.createMap()
       }
     }, 100)
@@ -200,7 +200,7 @@ class App extends Component {
     map.fitBounds(bounds);
     window.google.maps.event.addDomListener(window, 'resize', () => {
       map.fitBounds(bounds);
-    });
+    })
   }
 
 
@@ -256,11 +256,9 @@ class App extends Component {
 
 
   toggleActive = index => {
-    console.log(index)
     if (this.state.activeVenue === index) {
       this.setState({activeVenue: null})
-    }
-    else {
+    } else {
       this.setState({activeVenue: index})
     }
     window.google.maps.event.trigger(this.state.markers[index], 'click')
@@ -284,6 +282,7 @@ class App extends Component {
         <Navigation
           navClassName={this.state.navClassName} results={this.state.results}
           activeVenue={this.state.activeVenue} toggleActive={this.toggleActive}
+          markers={this.state.markers}
         />
         <div id="header-map-wrapper" style={wrapperStyle}>
           <header>

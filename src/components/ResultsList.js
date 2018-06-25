@@ -1,6 +1,5 @@
 import React, {Component} from 'react'
 import PropTypes from 'prop-types'
-//import escapeRegExp from 'escape-string-regexp'
 
 
 class ResultsList extends Component {
@@ -18,7 +17,7 @@ class ResultsList extends Component {
         {
           this.props.results.map((venue, i) => {
             let str
-            if (i === activeVenue) {str = 'list-group-item active'}
+            if (venue.index === activeVenue) {str = 'list-group-item active'}
             else {str = 'list-group-item'}
             return (
               <li key={i} className={str} onClick={() => toggleActive(venue.index)}>
