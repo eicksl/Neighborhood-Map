@@ -119,6 +119,50 @@ hr {
   margin-left: 17px;
 }
 
+.iw-name {
+  font-size: 18px;
+  color: black;
+  margin-top: 6px;
+}
+
+.iw-address {
+  margin-left: 25px;
+}
+
+.iw-phone {
+  margin-left: 25px;
+}
+
+.iw-img-container {
+  height: 200px;
+  width: 300px;
+  background: #dad2cd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 5px;
+}
+
+.iw-img-loader {
+  border: 12px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 12px solid #3498db;
+  width: 80px;
+  height: 80px;
+  animation: spin 2s linear infinite;
+}
+
+.iw-img {
+  position: absolute;
+  z-index: 10;
+  border-radius: 5px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 @media (max-width: 940px) {
   #logo {
     width: 300px;

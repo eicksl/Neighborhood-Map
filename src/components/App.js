@@ -23,7 +23,6 @@ class App extends Component {
     }
     setTimeout(() => {
       console.log(this.state)
-      //window.google.maps.event.trigger(this.state.markers[0], 'click')
     }, 5000)
   }
 
@@ -53,7 +52,7 @@ class App extends Component {
   }
 
 
-  getData(location, query) {
+  getData = (location, query) => {
     const url = new URL("https://maps.googleapis.com/maps/api/geocode/json")
     const params = {key: GOOGLE_API_KEY, address: location}
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
@@ -138,6 +137,10 @@ class App extends Component {
 
 
   getImage(venue_id, index) {
+    if ('image' in this.state.results[index]) {
+      this.attachImageToInfoWindow(this.state.results[index].image)
+      return
+    }
     const url = new URL("https://api.foursquare.com/v2/venues/" + venue_id + '/photos')
     const params = {
       client_id: FS_CLIENT_ID,
@@ -149,20 +152,36 @@ class App extends Component {
     fetch(url).then(resp => resp.json())
     .catch(() => alert('Image request from Foursquare API failed'))
     .then(resp => {
+      let image
       try {
         const prefix = resp.response.photos.items[0].prefix
         const suffix = resp.response.photos.items[0].suffix
-        const image = prefix + '300x200' + suffix
-        //const resultsCopy = [...this.state.results]
-        //const venueCopy = {...resultsCopy[index]}
-        //venueCopy.image = prefix + '300x200' + suffix
-        //resultsCopy[index] = venueCopy
-        //this.setState({results: resultsCopy})
-        this.setState(state => ({
-          results: [...state.results, [state.results[venue_id].image]: image]
-        }))
-      } catch(e) {console.log(e)}
+        image = prefix + '300x200' + suffix
+        this.setState(state => {
+          const resultsCopy = [...state.results]
+          resultsCopy[index].image = image
+          return {results: resultsCopy}
+        })
+      } catch(e) {
+        image = `${require('../img/placeholder.jpg')}`
+        //image = "https://kehilanews.com/wp-content/uploads/2016/08/placeholder-300-200.jpg"
+        this.setState(state => {
+          const resultsCopy = [...state.results]
+          resultsCopy[index].image = image
+          return {results: resultsCopy}
+        })
+      }
+      this.attachImageToInfoWindow(image)
     })
+  }
+
+
+  attachImageToInfoWindow(image) {
+    const {infoWindow} = this.state
+    let content = infoWindow.getContent()
+    content = content.substring(0, content.length - '</div></div>'.length)
+    content += `<img class='iw-img' src=${image}></div></div>`
+    infoWindow.setContent(content)
   }
 
 
@@ -218,25 +237,27 @@ class App extends Component {
 
     this.setState({activeVenue: venueIndex})
     infoWindow.marker = marker
-
-    content = "<div class='iw-content'>"
-    content += '<p><strong>' + venue.name + '</strong></p><p>' + venue.address + '</p>'
+    content = (
+      "<div class='iw-content'>" +
+      "<h1 class='iw-name'>" + venue.name + '</h1>' +
+      "<p class='iw-address'>" + venue.address + '</p>'
+    )
     if (typeof(venue.phone) !== 'undefined') {
-      content += '<p>' + venue.phone + '</p>'
+      content += "<p class='iw-phone'>" + venue.phone + '</p>'
     }
     if (typeof(venue.description) !== 'undefined') {
       content += '<p><em>' + venue.description + '</em></p>'
     }
-    if (typeof(venue.image) !== 'undefined') {
-      content += "<br><img src='" + venue.image + "'>"
-    }
-    content += '</div>'
+    content += "<br><div class='iw-img-container'><div class='iw-img-loader'>"
+    content += '</div></div></div>'
 
     infoWindow.setContent(content)
     infoWindow.addListener('closeclick', () => {
       this.setState({activeVenue: null})
     })
     infoWindow.open(map, marker)
+
+    this.getImage(venue.api_id, venue.index)
 
     window.google.maps.event.addListener(map, "click", () => {
       infoWindow.marker = null
@@ -282,7 +303,7 @@ class App extends Component {
         <Navigation
           navClassName={this.state.navClassName} results={this.state.results}
           activeVenue={this.state.activeVenue} toggleActive={this.toggleActive}
-          markers={this.state.markers}
+          markers={this.state.markers} getData={this.getData}
         />
         <div id="header-map-wrapper" style={wrapperStyle}>
           <header>

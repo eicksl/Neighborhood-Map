@@ -9,6 +9,8 @@ class Navigation extends PureComponent {
   constructor(props) {
     super(props)
     this.state = {
+      location: '',
+      query: '',
       filterValue: '',
       filteredResults: []
     }
@@ -19,7 +21,8 @@ class Navigation extends PureComponent {
     results: PropTypes.array.isRequired,
     navClassName: PropTypes.string.isRequired,
     activeVenue: PropTypes.number,
-    toggleActive: PropTypes.func.isRequired
+    toggleActive: PropTypes.func.isRequired,
+    getData: PropTypes.func.isRequired
   }
 
 
@@ -48,52 +51,56 @@ class Navigation extends PureComponent {
   }
 
 
+  handleInputChange = event => {
+    this.setState({
+      [event.target.name]: event.target.value
+    })
+  }
+
+
+  handleSubmit = event => {
+    event.preventDefault()
+    this.props.getData(this.state.location, this.state.query)
+  }
+
+
   render() {
     const {activeVenue, toggleActive} = this.props
     return (
       <nav className={this.props.navClassName}>
         <div className='sidebar-wrapper'>
-
-          <form>
-
+          <form onSubmit={this.handleSubmit}>
             <div className='row-4'>
               <div className='form-group search-fields'>
                 <label className='input-fields' htmlFor='location'>Location</label>
                 <input
                   id='location' className='form-control form-control-md' type='text'
                   name='location' placeholder='Enter a city, address, or area'
-                  data-bind='value: location'
+                  value={this.state.location} onChange={this.handleInputChange}
                 />
               </div>
             </div>
-
             <div className='row-4'>
               <div className='form-group search-fields'>
                 <label className='input-fields' htmlFor='query'>Type of Venue</label>
                 <input
                   id='query' className='form-control form-control-md' type='text'
                   name='query' placeholder="e.g. 'cafe', 'indian food'"
+                  value={this.state.query} onChange={this.handleInputChange}
                 />
               </div>
             </div>
-
             <div id='search-btn' className='col'>
               <button type='submit' className='btn btn-info'>Search Venues</button>
             </div>
-
           </form>
-
           <hr />
-
           <img id='img-icons' src={require('../img/icons.png')} alt='third party icons' />
-
           <input
             id='filter' className='form-control form-control-sm' type='text'
             placeholder='Filter Results' name='filter' onChange={this.updateFiltered}
           />
-
           <ResultsList results={this.state.filteredResults} activeVenue={activeVenue} toggleActive={toggleActive} />
-
         </div>
       </nav>
     )
