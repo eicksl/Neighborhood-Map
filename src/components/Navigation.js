@@ -27,7 +27,7 @@ class Navigation extends PureComponent {
 
 
   componentDidUpdate(prevProps) {
-    if (this.props.results !== prevProps.results) {
+    if (!prevProps.results.length && this.props.results !== prevProps.results) {
       //copy results to prevent the original indeces from being modified
       const resultsCopy = [...this.props.results]
       this.setState({filteredResults: resultsCopy.sort(sortBy('name'))})
@@ -98,7 +98,8 @@ class Navigation extends PureComponent {
           <img id='img-icons' src={require('../img/icons.png')} alt='third party icons' />
           <input
             id='filter' className='form-control form-control-sm' type='text'
-            placeholder='Filter Results' name='filter' onChange={this.updateFiltered}
+            placeholder='Filter Results' name='filter'
+            value={this.state.filterValue} onChange={this.updateFiltered}
           />
           <ResultsList results={this.state.filteredResults} activeVenue={activeVenue} toggleActive={toggleActive} />
         </div>

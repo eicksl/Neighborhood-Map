@@ -21,9 +21,6 @@ class App extends Component {
       results: [],
       markers: []
     }
-    setTimeout(() => {
-      console.log(this.state)
-    }, 5000)
   }
 
 
@@ -189,7 +186,7 @@ class App extends Component {
     const self = this
     const {map, results, infoWindow} = this.state
     const markers = []
-    let bounds = new window.google.maps.LatLngBounds();
+    const bounds = new window.google.maps.LatLngBounds()
 
     for (let i = 0; i < results.length; i++) {
       let marker = new window.google.maps.Marker({
@@ -211,14 +208,14 @@ class App extends Component {
         }
       })
 
-      markers.push(marker);
-      bounds.extend(marker.position);
+      markers.push(marker)
+      bounds.extend(marker.position)
     }
 
     this.setState({markers: markers})
-    map.fitBounds(bounds);
+    map.fitBounds(bounds)
     window.google.maps.event.addDomListener(window, 'resize', () => {
-      map.fitBounds(bounds);
+      map.fitBounds(bounds)
     })
   }
 
