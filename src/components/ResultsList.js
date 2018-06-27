@@ -8,7 +8,6 @@ class ResultsList extends Component {
     this.lastFocusedElem = null
 
     document.addEventListener('keydown', event => {
-      const {results} = this.props
       const activeElem = document.activeElement
       const focusLocation = () => {
         event.preventDefault()
@@ -29,8 +28,9 @@ class ResultsList extends Component {
         || !['INPUT', 'BUTTON', 'LI'].includes(activeElem.tagName) ) {
           if (activeElem.className !== 'iw-name') {
             focusLocation()
-          } else {
-            if (this.lastFocusedElem === lastListElem && !event.shiftKey) {
+          } else {  // heading of infoWindow is focused
+            if ( (this.lastFocusedElem === lastListElem && !event.shiftKey)
+            || this.lastFocusedElem === null ) {
               focusLocation()
             } else {
               this.lastFocusedElem.focus()
@@ -45,7 +45,7 @@ class ResultsList extends Component {
         event for that element should be triggered and focus should be moved
         to the heading of the resultant info-window
       */
-      
+
       else if (event.keyCode === 13 && activeElem.className.includes('list-group-item')) {
         this.lastFocusedElem = activeElem
         activeElem.click()

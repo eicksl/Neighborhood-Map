@@ -128,6 +128,7 @@ hr {
   font-size: 18px;
   color: black;
   margin-top: 6px;
+  outline: none;
 }
 
 .iw-address {

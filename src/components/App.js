@@ -1,11 +1,6 @@
 import React, {Component} from 'react'
-//import Script from 'react-load-script'
-//import {load} from 'little-loader'
-//import { withScriptjs, withGoogleMap, GoogleMap, Marker } from "react-google-maps"
-//import sortBy from 'sort-by'
 import {GOOGLE_API_KEY, FS_CLIENT_ID, FS_CLIENT_SECRET} from '../constants.js'
 import '../css/App.css'
-//import Map from './Map.js'
 import Navigation from './Navigation.js'
 
 
@@ -35,7 +30,6 @@ class App extends Component {
 
 
   createMap() {
-    //const geocoder = new window.google.maps.Geocoder
     const map = new window.google.maps.Map(document.getElementById('map'), {
       center: {lat: 40.7413549, lng: -73.9980244},
       zoom: 13,
@@ -49,7 +43,31 @@ class App extends Component {
         document.querySelector('.iw-name').focus()
       })
     })
-    this.getData('new york city', '')
+    this.sendInitialRequest()
+  }
+
+
+  sendInitialRequest() {
+    const self = this
+    navigator.geolocation.getCurrentPosition(
+      function success(pos) {
+        const geocoder = new window.google.maps.Geocoder()
+        const coordinates = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude
+        }
+        geocoder.geocode({location: coordinates}, (results, status) => {
+          let address = ''
+          if (status === 'OK' && results[0]) {
+            address = results[0].formatted_address;
+            self.getData(address, '')
+          }
+        })
+      },
+      function error() {
+        self.getData('new york city', '')
+      }
+    )
   }
 
 
