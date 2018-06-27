@@ -75,7 +75,7 @@ class Navigation extends PureComponent {
                 <label className='input-fields' htmlFor='location'>Location</label>
                 <input
                   id='location' className='form-control form-control-md' type='text'
-                  name='location' placeholder='Enter a city, address, or area'
+                  name='location' placeholder='Enter a city, address, or area' tabIndex='1'
                   value={this.state.location} onChange={this.handleInputChange}
                 />
               </div>

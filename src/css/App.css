@@ -114,6 +114,11 @@ hr {
   background: gray;
 }
 
+.list-group-item:focus {
+  background: gray;
+  outline: none;
+}
+
 .iw-content {
   width: 300px;
   margin-left: 17px;

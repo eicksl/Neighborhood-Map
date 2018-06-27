@@ -44,6 +44,10 @@ class App extends Component {
     this.setState({
       map: map,
       infoWindow: new window.google.maps.InfoWindow()
+    }, () => {
+      window.google.maps.event.addListener(this.state.infoWindow, 'domready', () => {
+        document.querySelector('.iw-name').focus()
+      })
     })
     this.getData('new york city', '')
   }
@@ -124,7 +128,6 @@ class App extends Component {
         } catch(e) {}
 
         results.push(info)
-        //this.getImage(info.api_id, i)
       }
 
       this.setState({results: results})
@@ -154,20 +157,14 @@ class App extends Component {
         const prefix = resp.response.photos.items[0].prefix
         const suffix = resp.response.photos.items[0].suffix
         image = prefix + '300x200' + suffix
-        this.setState(state => {
-          const resultsCopy = [...state.results]
-          resultsCopy[index].image = image
-          return {results: resultsCopy}
-        })
       } catch(e) {
         image = `${require('../img/placeholder.jpg')}`
-        //image = "https://kehilanews.com/wp-content/uploads/2016/08/placeholder-300-200.jpg"
-        this.setState(state => {
-          const resultsCopy = [...state.results]
-          resultsCopy[index].image = image
-          return {results: resultsCopy}
-        })
       }
+      this.setState(state => {
+        const resultsCopy = [...state.results]
+        resultsCopy[index].image = image
+        return {results: resultsCopy}
+      })
       this.attachImageToInfoWindow(image)
     })
   }
@@ -177,7 +174,7 @@ class App extends Component {
     const {infoWindow} = this.state
     let content = infoWindow.getContent()
     content = content.substring(0, content.length - '</div></div>'.length)
-    content += `<img class='iw-img' src=${image}></div></div>`
+    content += `<img class='iw-img' src=${image} alt='restaurant'></div></div>`
     infoWindow.setContent(content)
   }
 
@@ -236,7 +233,7 @@ class App extends Component {
     infoWindow.marker = marker
     content = (
       "<div class='iw-content'>" +
-      "<h1 class='iw-name'>" + venue.name + '</h1>' +
+      "<h1 class='iw-name' tabindex='1'>" + venue.name + '</h1>' +
       "<p class='iw-address'>" + venue.address + '</p>'
     )
     if (typeof(venue.phone) !== 'undefined') {
@@ -296,20 +293,20 @@ class App extends Component {
       zIndex: 3
     }
     return (
-      <div id="app-container">
+      <div id='app-container'>
         <Navigation
           navClassName={this.state.navClassName} results={this.state.results}
           activeVenue={this.state.activeVenue} toggleActive={this.toggleActive}
           markers={this.state.markers} getData={this.getData}
         />
-        <div id="header-map-wrapper" style={wrapperStyle}>
+        <div id='header-map-wrapper' style={wrapperStyle}>
           <header>
-            <div id='nav-icon-wrapper' onClick={this.toggleNavClassName}>
+            <div id='nav-icon-wrapper' aria-label='toggle menu' onClick={this.toggleNavClassName}>
               <div className='nav-icon'></div>
               <div className='nav-icon'></div>
               <div className='nav-icon'></div>
             </div>
-            <img id='logo' src={require('../img/logo.png')} alt='' />
+            <img id='logo' src={require('../img/logo.png')} alt='logo' />
           </header>
           <div id="map" role="application" style={mapStyle}></div>
         </div>
