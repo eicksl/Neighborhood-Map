@@ -29,6 +29,9 @@ class ResultsList extends Component {
           if (activeElem.className !== 'iw-name') {
             focusLocation()
           } else {  // heading of infoWindow is focused
+            if (this.props.navClassName.includes('collapsed')) {
+              this.props.toggleNavClassName()
+            }
             if ( (this.lastFocusedElem === lastListElem && !event.shiftKey)
             || this.lastFocusedElem === null ) {
               focusLocation()
@@ -53,10 +56,13 @@ class ResultsList extends Component {
     })
   }
 
+
   static propTypes = {
     results: PropTypes.array.isRequired,
     activeVenue: PropTypes.number,
-    toggleActive: PropTypes.func.isRequired
+    toggleActive: PropTypes.func.isRequired,
+    navClassName: PropTypes.string.isRequired,
+    toggleNavClassName: PropTypes.func.isRequired
   }
 
 

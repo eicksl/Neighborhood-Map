@@ -20,6 +20,7 @@ class Navigation extends PureComponent {
   static propTypes = {
     results: PropTypes.array.isRequired,
     navClassName: PropTypes.string.isRequired,
+    toggleNavClassName: PropTypes.func.isRequired,
     activeVenue: PropTypes.number,
     toggleActive: PropTypes.func.isRequired,
     getData: PropTypes.func.isRequired
@@ -65,7 +66,7 @@ class Navigation extends PureComponent {
 
 
   render() {
-    const {activeVenue, toggleActive} = this.props
+    const {activeVenue, toggleActive, navClassName, toggleNavClassName} = this.props
     return (
       <nav className={this.props.navClassName}>
         <div className='sidebar-wrapper'>
@@ -101,7 +102,10 @@ class Navigation extends PureComponent {
             placeholder='Filter Results' name='filter'
             value={this.state.filterValue} onChange={this.updateFiltered}
           />
-          <ResultsList results={this.state.filteredResults} activeVenue={activeVenue} toggleActive={toggleActive} />
+          <
+            ResultsList results={this.state.filteredResults} activeVenue={activeVenue}
+            toggleActive={toggleActive} navClassName={navClassName} toggleNavClassName={toggleNavClassName}
+          />
         </div>
       </nav>
     )

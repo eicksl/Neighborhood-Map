@@ -309,6 +309,9 @@ class App extends Component {
       this.setState({activeVenue: index})
     }
     window.google.maps.event.trigger(this.state.markers[index], 'click')
+    if (window.innerWidth < 700 && this.state.navClassName === 'sidebar') {
+      this.toggleNavClassName()
+    }
   }
 
 
@@ -329,7 +332,7 @@ class App extends Component {
         <Navigation
           navClassName={this.state.navClassName} results={this.state.results}
           activeVenue={this.state.activeVenue} toggleActive={this.toggleActive}
-          markers={this.state.markers} getData={this.getData}
+          markers={this.state.markers} getData={this.getData} toggleNavClassName={this.toggleNavClassName}
         />
         <div id='header-map-wrapper' style={wrapperStyle}>
           <header>
