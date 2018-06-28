@@ -79,8 +79,12 @@ class App extends Component {
     this.setState({markers: []})
 
     fetch(url).then(resp => resp.json())
-    .catch(() => alert('Failed to retrieve location coordinates from Google Geocode'))
+    .catch(() => alert('A network error occurred'))
     .then(resp => {
+      if (resp.status === 'REQUEST_DENIED') {
+        alert('Invalid API call to Google Geocode')
+        return
+      }
       try {
         let lat = resp.results[0].geometry.location.lat
         let lng = resp.results[0].geometry.location.lng
@@ -106,9 +110,13 @@ class App extends Component {
     }
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 
-    fetch(url).then(resp => resp.json())
-    .catch(() => alert('Failed to retrieve venue data from Foursquare'))
-    .then(resp => {
+    fetch(url).then(resp => {
+      if (!resp.ok) {
+        throw new Error('Invalid request to Foursquare API')
+      }
+      return resp.json()
+
+    }).then(resp => {
       const numOfVenues = resp.response.groups[0].items.length
       const results = []
 
@@ -150,7 +158,8 @@ class App extends Component {
 
       this.setState({results: results})
       this.addMarkers()
-    })
+
+    }).catch(error => alert(error))
   }
 
 
@@ -167,8 +176,13 @@ class App extends Component {
     }
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 
-    fetch(url).then(resp => resp.json())
-    .catch(() => alert('Image request from Foursquare API failed'))
+    fetch(url).then(resp => {
+      if (!resp.ok) {
+        alert('Could not retrieve image from Foursquare API')
+      }
+      return resp.json()
+    })
+    .catch(() => alert('A network error occurred'))
     .then(resp => {
       let image
       try {
