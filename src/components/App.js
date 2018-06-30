@@ -65,6 +65,7 @@ class App extends Component {
         })
       },
       function error() {
+        console.log()
         self.getData('new york city', '')
       }
     )

@@ -28,7 +28,7 @@ class Navigation extends PureComponent {
 
 
   componentDidUpdate(prevProps) {
-    if (!prevProps.results.length && this.props.results !== prevProps.results) {
+    if (this.props.results !== prevProps.results) {
       //copy results to prevent the original indeces from being modified
       const resultsCopy = [...this.props.results]
       this.setState({filteredResults: resultsCopy.sort(sortBy('name'))})
@@ -66,6 +66,7 @@ class Navigation extends PureComponent {
 
 
   render() {
+    //console.log(this.state.filteredResults)
     const {activeVenue, toggleActive, navClassName, toggleNavClassName} = this.props
     return (
       <nav className={this.props.navClassName}>
@@ -76,8 +77,9 @@ class Navigation extends PureComponent {
                 <label className='input-fields' htmlFor='location'>Location</label>
                 <input
                   id='location' className='form-control form-control-md' type='text'
-                  name='location' placeholder='Enter a city, address, or area' tabIndex='1'
+                  name='location' placeholder='Enter a city, address, or area'
                   value={this.state.location} onChange={this.handleInputChange}
+                  autoComplete="off" tabIndex='1'
                 />
               </div>
             </div>
@@ -88,6 +90,7 @@ class Navigation extends PureComponent {
                   id='query' className='form-control form-control-md' type='text'
                   name='query' placeholder="e.g. 'cafe', 'indian food'"
                   value={this.state.query} onChange={this.handleInputChange}
+                  autoComplete="off"
                 />
               </div>
             </div>
@@ -99,7 +102,7 @@ class Navigation extends PureComponent {
           <img id='img-icons' src={require('../img/icons.png')} alt='third party icons' />
           <input
             id='filter' className='form-control form-control-sm' type='text'
-            placeholder='Filter Results' name='filter'
+            placeholder='Filter Results' name='filter' autoComplete="off"
             value={this.state.filterValue} onChange={this.updateFiltered}
           />
           <
