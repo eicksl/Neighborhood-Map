@@ -28,7 +28,7 @@ class Navigation extends PureComponent {
 
 
   componentDidUpdate(prevProps) {
-    if (this.props.results !== prevProps.results) {
+    if (!prevProps.results.length && this.props.results !== prevProps.results) {
       //copy results to prevent the original indeces from being modified
       const resultsCopy = [...this.props.results]
       this.setState({filteredResults: resultsCopy.sort(sortBy('name'))})
@@ -66,7 +66,6 @@ class Navigation extends PureComponent {
 
 
   render() {
-    //console.log(this.state.filteredResults)
     const {activeVenue, toggleActive, navClassName, toggleNavClassName} = this.props
     return (
       <nav className={this.props.navClassName}>

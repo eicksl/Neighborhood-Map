@@ -77,7 +77,7 @@ class App extends Component {
     const params = {key: GOOGLE_API_KEY, address: location}
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
 
-    this.setState({markers: []})
+    this.setState({ results: [], markers: [] })
 
     fetch(url).then(resp => resp.json())
     .catch(() => alert('A network error occurred'))
